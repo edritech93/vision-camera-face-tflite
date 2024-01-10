@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Animated,
+  Button,
   Dimensions,
   Platform,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
+  Text,
 } from 'react-native';
 import {
   Camera,
@@ -14,8 +17,16 @@ import {
   useCameraFormat,
   useCameraDevice,
 } from 'react-native-vision-camera';
-import { scanFaces, type FaceType } from 'vision-camera-face-tflite';
+import {
+  scanFaces,
+  type FaceType,
+  initTensor,
+  tensorBase64,
+} from 'vision-camera-face-tflite';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { Worklets } from 'react-native-worklets-core';
+import { View } from 'react-native';
+import { getPermissionReadStorage } from './permission';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Platform.select<number>({
@@ -30,10 +41,10 @@ const targetFps = 30;
 export default function App() {
   const [hasPermission, setHasPermission] = useState(false);
   const [faces, setFaces] = useState<FaceType[]>([]);
-  const setFacesJS = Worklets.createRunInJsFn(setFaces);
+  const [arrayTensor, setArrayTensor] = useState<number[]>([]);
 
   const camera = useRef<Camera>(null);
-
+  const setFacesJS = Worklets.createRunInJsFn(setFaces);
   const device = useCameraDevice('front', {
     physicalDevices: [
       'ultra-wide-angle-camera',
@@ -49,6 +60,12 @@ export default function App() {
     { photoResolution: 'max' },
   ]);
   const fps = Math.min(format?.maxFps ?? 1, targetFps);
+
+  useEffect(() => {
+    initTensor('mobile_face_net', 1)
+      .then((response) => console.log(response))
+      .catch((error) => console.log(error));
+  }, []);
 
   useEffect(() => {
     async function _getPermission() {
@@ -71,6 +88,35 @@ export default function App() {
     const scannedFaces = scanFaces(frame);
     setFacesJS(scannedFaces);
   }, []);
+
+  const _onOpenImage = async () => {
+    await getPermissionReadStorage().catch((error: Error) => {
+      console.log(error);
+      return;
+    });
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      includeBase64: true,
+    });
+    if (
+      result &&
+      result.assets &&
+      result.assets.length > 0 &&
+      result.assets[0]?.uri
+    ) {
+      tensorBase64(result.assets[0].base64 || '')
+        .then((response) => {
+          const objRes: number[] =
+            Platform.OS === 'android' ? JSON.parse(response) : response;
+          const arrayRes: number[] = objRes.map((e: number) => {
+            const stringFixed: string = e.toFixed(5);
+            return parseFloat(stringFixed);
+          });
+          setArrayTensor(arrayRes);
+        })
+        .catch((error) => console.log('error tensorImage =>', error));
+    }
+  };
 
   if (device != null && format != null && hasPermission) {
     // console.log(
@@ -99,12 +145,25 @@ export default function App() {
           audio={false}
           frameProcessor={frameProcessor}
         />
-        {faces && faces.length > 0 && (
-          <Animated.Image
-            source={{ uri: `data:image/png;base64,${faces[0]?.imageResult}` }}
-            style={styles.imageFace}
+        <View style={styles.wrapBottom}>
+          <Button title={'Open Image'} onPress={_onOpenImage} />
+          <Button
+            title={'Clear Data'}
+            color={'red'}
+            onPress={() => setArrayTensor([])}
           />
-        )}
+        </View>
+        <ScrollView>
+          <Text style={styles.textResult}>{`Result: ${JSON.stringify(
+            arrayTensor
+          )}`}</Text>
+          {faces && faces.length > 0 && (
+            <Animated.Image
+              source={{ uri: `data:image/png;base64,${faces[0]?.imageResult}` }}
+              style={styles.imageFace}
+            />
+          )}
+        </ScrollView>
       </SafeAreaView>
     );
   } else {
@@ -120,5 +179,14 @@ const styles = StyleSheet.create({
     height: 150,
     width: 150,
     margin: 16,
+  },
+  textResult: {
+    color: 'black',
+    marginHorizontal: 8,
+  },
+  wrapBottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
   },
 });
