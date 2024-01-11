@@ -103,41 +103,7 @@ class VisionCameraFaceTflitePlugin(options: Map<String, Any>?) : FrameProcessorP
       val image = InputImage.fromMediaImage(frame.image, Convert().getRotation(frame))
       val task = faceDetector.process(image)
       val faces = Tasks.await(task)
-//      val array = ArrayList<Any>()
-//      for (face in faces) {
-//        val map: WritableMap = WritableNativeMap()
-//        val bmpFrameResult = ImageConvertUtils.getInstance().getUpRightBitmap(image)
-//        val bmpFaceResult = Bitmap.createBitmap(
-//          Constant.TF_OD_API_INPUT_SIZE,
-//          Constant.TF_OD_API_INPUT_SIZE,
-//          Bitmap.Config.ARGB_8888
-//        )
-//        val faceBB = RectF(face.boundingBox)
-//        val cvFace = Canvas(bmpFaceResult)
-//        val sx = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.width()
-//        val sy = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.height()
-//        val matrix = Matrix()
-//        matrix.postTranslate(-faceBB.left, -faceBB.top)
-//        matrix.postScale(sx, sy)
-//        cvFace.drawBitmap(bmpFrameResult, matrix, null)
-//        val imageResult: String = Convert().getBase64Image(bmpFaceResult).toString()
-//        map.putDouble("rollAngle", face.headEulerAngleZ.toDouble())
-//        map.putDouble("pitchAngle", face.headEulerAngleX.toDouble())
-//        map.putDouble("yawAngle", face.headEulerAngleY.toDouble())
-//        map.putDouble("leftEyeOpenProbability", face.leftEyeOpenProbability!!.toDouble())
-//        map.putDouble("rightEyeOpenProbability", face.rightEyeOpenProbability!!.toDouble())
-//        map.putDouble("smilingProbability", face.smilingProbability!!.toDouble())
-////        val contours: MutableMap<String, Any> = processFaceContours(face);
-//        val bounds = processBoundingBox(face.boundingBox)
-//        map.putMap("bounds", bounds)
-////        map.putMap("contours", contours)
-//        map.putString("imageResult", imageResult)
-//        array.add(map);
-//      }
-//      return array
-
       val array: MutableCollection<Any> = ArrayList()
-//      val array = ArrayList<Any>()
       for (face in faces) {
         val map: MutableMap<String, Any> = HashMap()
         val bmpFrameResult = ImageConvertUtils.getInstance().getUpRightBitmap(image)
@@ -166,19 +132,13 @@ class VisionCameraFaceTflitePlugin(options: Map<String, Any>?) : FrameProcessorP
         map["rightEyeOpenProbability"] = face.rightEyeOpenProbability!!.toDouble()
         map["smilingProbability"] = face.smilingProbability!!.toDouble()
 
-//        val contours: MutableMap<String, Any> = processFaceContours(face);
+        val contours = processFaceContours(face);
         val bounds = processBoundingBox(face.boundingBox)
         map["bounds"] = bounds
-//        map["contours"] = contours
+        map["contours"] = contours
         map["imageResult"] = imageResult
         array.add(map)
       }
-//      val result = hashMapOf<String, Any>()
-//      result["data"] = array
-//      return hashMapOf("result" to array)
-//      val cars = ArrayList<String>()
-//      cars.toString()
-
       return array
     } catch (e: Exception) {
       e.printStackTrace().toString()
