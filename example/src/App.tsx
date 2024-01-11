@@ -83,7 +83,9 @@ export default function App() {
   const frameProcessor = useFrameProcessor((frame: Frame) => {
     'worklet';
     const scannedFaces = scanFaces(frame);
-    setFacesJS(scannedFaces);
+    if (scannedFaces) {
+      setFacesJS(scannedFaces);
+    }
   }, []);
 
   const _onOpenImage = async () => {

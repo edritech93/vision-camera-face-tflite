@@ -100,7 +100,7 @@ class VisionCameraFaceTflitePlugin(options: Map<String, Any>?) : FrameProcessorP
 
   override fun callback(frame: Frame, params: Map<String, Any>?): Any? {
     try {
-      val image = InputImage.fromMediaImage(frame.image, Convert().getRotation(frame))
+      val image = InputImage.fromMediaImage(frame.image, 270)
       val task = faceDetector.process(image)
       val faces = Tasks.await(task)
       val array: MutableCollection<Any> = ArrayList()
@@ -122,20 +122,19 @@ class VisionCameraFaceTflitePlugin(options: Map<String, Any>?) : FrameProcessorP
         cvFace.drawBitmap(bmpFrameResult, matrix, null)
         val imageResult: String = Convert().getBase64Image(bmpFaceResult).toString()
 
-        map["name"] = "Yudi"
         map["rollAngle"] =
-          face.headEulerAngleZ.toDouble()  // Head is rotated to the left rotZ degrees
+          face.headEulerAngleZ.toDouble()
         map["pitchAngle"] =
-          face.headEulerAngleX.toDouble() // Head is rotated to the right rotX degrees
-        map["yawAngle"] = face.headEulerAngleY.toDouble()   // Head is tilted sideways rotY degrees
+          face.headEulerAngleX.toDouble()
+        map["yawAngle"] = face.headEulerAngleY.toDouble()
         map["leftEyeOpenProbability"] = face.leftEyeOpenProbability!!.toDouble()
         map["rightEyeOpenProbability"] = face.rightEyeOpenProbability!!.toDouble()
         map["smilingProbability"] = face.smilingProbability!!.toDouble()
 
-        val contours = processFaceContours(face);
+//        val contours = processFaceContours(face);
         val bounds = processBoundingBox(face.boundingBox)
         map["bounds"] = bounds
-        map["contours"] = contours
+//        map["contours"] = contours
         map["imageResult"] = imageResult
         array.add(map)
       }
