@@ -24,9 +24,9 @@ import {
   tensorBase64,
 } from 'vision-camera-face-tflite';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { getPermissionReadStorage } from './permission';
 import { Worklets } from 'react-native-worklets-core';
 import { View } from 'react-native';
-import { getPermissionReadStorage } from './permission';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Platform.select<number>({
@@ -62,12 +62,6 @@ export default function App() {
   const fps = Math.min(format?.maxFps ?? 1, targetFps);
 
   useEffect(() => {
-    initTensor('mobile_face_net', 1)
-      .then((response) => console.log(response))
-      .catch((error) => console.log(error));
-  }, []);
-
-  useEffect(() => {
     async function _getPermission() {
       const status = await Camera.requestCameraPermission();
       setHasPermission(status === 'granted');
@@ -81,6 +75,9 @@ export default function App() {
 
   const onInitialized = useCallback(() => {
     console.log('Camera initialized!');
+    initTensor('mobile_face_net', 1)
+      .then((response) => console.log(response))
+      .catch((error) => console.log(error));
   }, []);
 
   const frameProcessor = useFrameProcessor((frame: Frame) => {

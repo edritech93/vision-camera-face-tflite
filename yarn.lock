@@ -12997,6 +12997,7 @@ __metadata:
     react: "*"
     react-native: "*"
     react-native-vision-camera: ">= 3"
+    react-native-worklets-core: "*"
   languageName: unknown
   linkType: soft
 

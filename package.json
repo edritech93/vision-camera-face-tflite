@@ -83,7 +83,8 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
-    "react-native-vision-camera": ">= 3"
+    "react-native-vision-camera": ">= 3",
+    "react-native-worklets-core": "*"
   },
   "workspaces": [
     "example"
