@@ -15,7 +15,7 @@
     "react-native-image-picker": "^7.1.0",
     "react-native-permissions": "^4.0.4",
     "react-native-reanimated": "^3.6.1",
-    "react-native-vision-camera": "^3.7.0",
+    "react-native-vision-camera": "^3.7.1",
     "react-native-worklets-core": "^0.2.4"
   },
   "devDependencies": {
