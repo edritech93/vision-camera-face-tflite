@@ -5,12 +5,13 @@ import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewManager
 import com.mrousavy.camera.frameprocessor.FrameProcessorPluginRegistry
+import com.visioncamerafacetflite.visioncamerafacetfliteplugin.VisionCameraFaceTflitePluginPlugin
 
 class VisionCameraFaceTflitePackage : ReactPackage {
   companion object {
     init {
-      FrameProcessorPluginRegistry.addFrameProcessorPlugin("scanFace") { options ->
-        VisionCameraFaceTflitePlugin(options)
+      FrameProcessorPluginRegistry.addFrameProcessorPlugin("scanFace") { proxy, options ->
+        VisionCameraFaceTflitePluginPlugin(proxy, options)
       }
     }
   }

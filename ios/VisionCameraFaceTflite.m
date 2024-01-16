@@ -4,21 +4,20 @@
 
 #import "VisionCameraFaceTflite-Swift.h"
 
-// VISION_EXPORT_SWIFT_FRAME_PROCESSOR(VisionCameraFaceTflite, scanFace)
-
-@interface VisionCameraFaceTflite (FrameProcessorPluginLoader)
+@interface VisionCameraFaceTflitePlugin (FrameProcessorPluginLoader)
 @end
 
-@implementation VisionCameraFaceTflite (FrameProcessorPluginLoader)
+@implementation VisionCameraFaceTflitePlugin (FrameProcessorPluginLoader)
 
 + (void)load
 {
   [FrameProcessorPluginRegistry addFrameProcessorPlugin:@"scanFace"
-                                        withInitializer:^FrameProcessorPlugin*(NSDictionary* options) {
-    return [[VisionCameraFaceTflite alloc] initWithOptions:options];
-  }];
-}
-
+                                        withInitializer:^FrameProcessorPlugin* _Nonnull(VisionCameraProxyHolder* _Nonnull proxy,         
+                                                                                        NSDictionary* _Nullable options) {               
+                                          return [[VisionCameraFaceTflitePlugin alloc] initWithProxy:proxy withOptions:options];
+                                        }];
+}                                                                                                                                        
+                                                                                                                                         
 @end
 
 #endif

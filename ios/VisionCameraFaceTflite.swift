@@ -5,8 +5,12 @@ import CoreML
 import UIKit
 import AVFoundation
 
-@objc(VisionCameraFaceTflite)
-public class VisionCameraFaceTflite: FrameProcessorPlugin {
+@objc(VisionCameraFaceTflitePlugin)
+public class VisionCameraFaceTflitePlugin: FrameProcessorPlugin {
+    public override init(proxy: VisionCameraProxyHolder, options: [AnyHashable: Any]! = [:]) {
+        super.init(proxy: proxy, options: options)
+    }
+
     static var FaceDetectorOption: FaceDetectorOptions = {
         let option = FaceDetectorOptions()
         option.contourMode = .none
@@ -105,7 +109,7 @@ public class VisionCameraFaceTflite: FrameProcessorPlugin {
         var faceAttributes: [Any] = []
         
         do {
-            let faces: [Face] =  try VisionCameraFaceTflite.faceDetector.results(in: image)
+            let faces: [Face] =  try VisionCameraFaceTflitePlugin.faceDetector.results(in: image)
             if (!faces.isEmpty){
                 for face in faces {
                     let imageCrop = getImageFaceFromBuffer(from: frame.buffer, rectImage: face.frame)
@@ -120,8 +124,8 @@ public class VisionCameraFaceTflite: FrameProcessorPlugin {
                     map["leftEyeOpenProbability"] = face.leftEyeOpenProbability
                     map["rightEyeOpenProbability"] = face.rightEyeOpenProbability
                     map["smilingProbability"] = face.smilingProbability
-                    map["bounds"] = VisionCameraFaceTflite.processBoundingBox(from: face)
-                    map["contours"] = VisionCameraFaceTflite.processContours(from: face)
+                    map["bounds"] = VisionCameraFaceTflitePlugin.processBoundingBox(from: face)
+                    map["contours"] = VisionCameraFaceTflitePlugin.processContours(from: face)
                     map["imageResult"] = imageResult
                     
                     faceAttributes.append(map)

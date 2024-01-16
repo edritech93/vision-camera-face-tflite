@@ -14,11 +14,10 @@ import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.mrousavy.camera.frameprocessor.Frame
 import com.mrousavy.camera.frameprocessor.FrameProcessorPlugin
+import com.mrousavy.camera.frameprocessor.VisionCameraProxy
 import kotlin.math.ceil
 
-class VisionCameraFaceTflitePlugin(options: Map<String, Any>?) : FrameProcessorPlugin(
-  options
-) {
+class VisionCameraFaceTflitePluginPlugin(proxy: VisionCameraProxy, options: Map<String, Any>?): FrameProcessorPlugin() {
   private var faceDetectorOptions = FaceDetectorOptions.Builder()
     .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
     .setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
