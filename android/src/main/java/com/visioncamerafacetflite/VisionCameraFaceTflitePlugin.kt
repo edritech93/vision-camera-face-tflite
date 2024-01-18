@@ -17,7 +17,7 @@ import com.mrousavy.camera.frameprocessor.FrameProcessorPlugin
 import com.mrousavy.camera.frameprocessor.VisionCameraProxy
 import kotlin.math.ceil
 
-class VisionCameraFaceTflitePluginPlugin(proxy: VisionCameraProxy, options: Map<String, Any>?): FrameProcessorPlugin() {
+class VisionCameraFaceTflitePlugin(proxy: VisionCameraProxy, options: Map<String, Any>?): FrameProcessorPlugin() {
   private var faceDetectorOptions = FaceDetectorOptions.Builder()
     .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
     .setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
@@ -99,45 +99,50 @@ class VisionCameraFaceTflitePluginPlugin(proxy: VisionCameraProxy, options: Map<
 
   override fun callback(frame: Frame, params: Map<String, Any>?): Any? {
     try {
-      val image = InputImage.fromMediaImage(frame.image, 270)
-      val task = faceDetector.process(image)
-      val faces = Tasks.await(task)
-      val array: MutableCollection<Any> = ArrayList()
-      for (face in faces) {
-        val map: MutableMap<String, Any> = HashMap()
-        val bmpFrameResult = ImageConvertUtils.getInstance().getUpRightBitmap(image)
-        val bmpFaceResult = Bitmap.createBitmap(
-          Constant.TF_OD_API_INPUT_SIZE,
-          Constant.TF_OD_API_INPUT_SIZE,
-          Bitmap.Config.ARGB_8888
-        )
-        val faceBB = RectF(face.boundingBox)
-        val cvFace = Canvas(bmpFaceResult)
-        val sx = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.width()
-        val sy = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.height()
-        val matrix = Matrix()
-        matrix.postTranslate(-faceBB.left, -faceBB.top)
-        matrix.postScale(sx, sy)
-        cvFace.drawBitmap(bmpFrameResult, matrix, null)
-        val imageResult: String = Convert().getBase64Image(bmpFaceResult).toString()
+      val mediaImage = frame.image
+      if (mediaImage != null) {
+        val image = InputImage.fromMediaImage(mediaImage, frame.orientation.toDegrees())
+        val task = faceDetector.process(image)
+        val faces = Tasks.await(task)
+        val array: MutableCollection<Any> = ArrayList()
+        for (face in faces) {
+          val map: MutableMap<String, Any> = HashMap()
+          val bmpFrameResult = ImageConvertUtils.getInstance().getUpRightBitmap(image)
+          val bmpFaceResult = Bitmap.createBitmap(
+            Constant.TF_OD_API_INPUT_SIZE,
+            Constant.TF_OD_API_INPUT_SIZE,
+            Bitmap.Config.ARGB_8888
+          )
+          val faceBB = RectF(face.boundingBox)
+          val cvFace = Canvas(bmpFaceResult)
+          val sx = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.width()
+          val sy = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.height()
+          val matrix = Matrix()
+          matrix.postTranslate(-faceBB.left, -faceBB.top)
+          matrix.postScale(sx, sy)
+          cvFace.drawBitmap(bmpFrameResult, matrix, null)
+          val imageResult: String = Convert().getBase64Image(bmpFaceResult).toString()
 
-        map["rollAngle"] =
-          face.headEulerAngleZ.toDouble()
-        map["pitchAngle"] =
-          face.headEulerAngleX.toDouble()
-        map["yawAngle"] = face.headEulerAngleY.toDouble()
-        map["leftEyeOpenProbability"] = face.leftEyeOpenProbability!!.toDouble()
-        map["rightEyeOpenProbability"] = face.rightEyeOpenProbability!!.toDouble()
-        map["smilingProbability"] = face.smilingProbability!!.toDouble()
+          map["rollAngle"] =
+            face.headEulerAngleZ.toDouble()
+          map["pitchAngle"] =
+            face.headEulerAngleX.toDouble()
+          map["yawAngle"] = face.headEulerAngleY.toDouble()
+          map["leftEyeOpenProbability"] = face.leftEyeOpenProbability!!.toDouble()
+          map["rightEyeOpenProbability"] = face.rightEyeOpenProbability!!.toDouble()
+          map["smilingProbability"] = face.smilingProbability!!.toDouble()
 
 //        val contours = processFaceContours(face);
-        val bounds = processBoundingBox(face.boundingBox)
-        map["bounds"] = bounds
+          val bounds = processBoundingBox(face.boundingBox)
+          map["bounds"] = bounds
 //        map["contours"] = contours
-        map["imageResult"] = imageResult
-        array.add(map)
+          map["imageResult"] = imageResult
+          array.add(map)
+        }
+        return array
+      } else {
+        return null
       }
-      return array
     } catch (e: Exception) {
       e.printStackTrace().toString()
       return null

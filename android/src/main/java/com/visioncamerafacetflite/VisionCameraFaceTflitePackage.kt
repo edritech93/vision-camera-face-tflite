@@ -10,7 +10,7 @@ class VisionCameraFaceTflitePackage : ReactPackage {
   companion object {
     init {
       FrameProcessorPluginRegistry.addFrameProcessorPlugin("scanFace") { proxy, options ->
-        VisionCameraFaceTflitePluginPlugin(proxy, options)
+        VisionCameraFaceTflitePlugin(proxy, options)
       }
     }
   }
