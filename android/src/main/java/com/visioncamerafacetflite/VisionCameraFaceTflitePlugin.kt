@@ -15,6 +15,7 @@ import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.mrousavy.camera.frameprocessor.Frame
 import com.mrousavy.camera.frameprocessor.FrameProcessorPlugin
 import com.mrousavy.camera.frameprocessor.VisionCameraProxy
+import com.mrousavy.camera.types.Orientation
 import kotlin.math.ceil
 
 class VisionCameraFaceTflitePlugin(proxy: VisionCameraProxy, options: Map<String, Any>?): FrameProcessorPlugin() {
@@ -101,7 +102,7 @@ class VisionCameraFaceTflitePlugin(proxy: VisionCameraProxy, options: Map<String
     try {
       val mediaImage = frame.image
       if (mediaImage != null) {
-        val image = InputImage.fromMediaImage(mediaImage, frame.orientation.toDegrees())
+        val image = InputImage.fromMediaImage(mediaImage, Orientation.PORTRAIT.toDegrees())
         val task = faceDetector.process(image)
         val faces = Tasks.await(task)
         val array: MutableCollection<Any> = ArrayList()
