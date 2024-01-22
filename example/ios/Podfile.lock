@@ -1188,7 +1188,7 @@ PODS:
     - TensorFlowLiteSwift/Core (= 2.14.0)
   - TensorFlowLiteSwift/Core (2.14.0):
     - TensorFlowLiteC (= 2.14.0)
-  - VisionCamera (3.8.0):
+  - VisionCamera (3.8.2):
     - React
     - React-callinvoker
     - React-Core
@@ -1503,7 +1503,7 @@ SPEC CHECKSUMS:
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   TensorFlowLiteC: a836de9b6e6018665ccc349538bdd2c3b80dd7a5
   TensorFlowLiteSwift: f706b143b69d7bf433aba7b08049bdd11c321a10
-  VisionCamera: 8e3454abf4baa43a2b9ad9cfc9723d1cc89d9eb6
+  VisionCamera: edbcd00e27a438b2228f67823e2b8d15a189065f
   VisionCameraFaceTflite: a1d1672be87ddc952f19540520ed8be397673348
   Yoga: 13c8ef87792450193e117976337b8527b49e8c03
 
