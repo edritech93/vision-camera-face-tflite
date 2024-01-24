@@ -20,12 +20,13 @@ import {
 import {
   scanFaces,
   type FaceType,
-  initTensor,
+  // initTensor,
   tensorBase64,
 } from 'vision-camera-face-tflite';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { useResizePlugin } from 'vision-camera-resize-plugin';
 import { getPermissionReadStorage } from './permission';
-import { Worklets } from 'react-native-worklets-core';
+// import { Worklets, useSharedValue } from 'react-native-worklets-core';
 import { View } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -40,11 +41,11 @@ const targetFps = 30;
 
 export default function App() {
   const [hasPermission, setHasPermission] = useState(false);
-  const [faces, setFaces] = useState<FaceType[]>([]);
+  const [faces, _] = useState<FaceType[]>([]);
   const [arrayTensor, setArrayTensor] = useState<number[]>([]);
 
   const camera = useRef<Camera>(null);
-  const setFacesJS = Worklets.createRunInJsFn(setFaces);
+  // const setFacesJS = Worklets.createRunInJsFn(setFaces);
   const device = useCameraDevice('front', {
     physicalDevices: [
       'ultra-wide-angle-camera',
@@ -54,8 +55,6 @@ export default function App() {
   });
   const format = useCameraFormat(device, [
     { fps: targetFps },
-    { videoAspectRatio: screenAspectRatio },
-    { videoResolution: 'max' },
     { photoAspectRatio: screenAspectRatio },
     { photoResolution: 'max' },
   ]);
@@ -75,17 +74,28 @@ export default function App() {
 
   const onInitialized = useCallback(() => {
     console.log('Camera initialized!');
-    initTensor('mobile_face_net', 1)
-      .then((response) => console.log(response))
-      .catch((error) => console.log(error));
+    // initTensor('mobile_face_net', 1)
+    //   .then((response) => console.log(response))
+    //   .catch((error) => console.log(error));
   }, []);
 
+  const { resize } = useResizePlugin();
   const frameProcessor = useFrameProcessor((frame: Frame) => {
     'worklet';
-    const scannedFaces = scanFaces(frame);
-    if (scannedFaces) {
-      setFacesJS(scannedFaces);
-    }
+    const start = performance.now();
+    const dataFace = scanFaces(frame);
+    console.log('dataFace => ', dataFace);
+    const data = resize(frame, {
+      size: {
+        width: 192,
+        height: 192,
+      },
+      pixelFormat: 'rgb-uint8',
+    });
+    const array = new Uint8Array(data);
+    console.log(array);
+    const end = performance.now();
+    console.log(`Performance: ${end - start}ms`);
   }, []);
 
   const _onOpenImage = async () => {
