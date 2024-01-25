@@ -70,8 +70,8 @@ export default function App() {
 
   const rectWidthR = useSharedValueR(100); // rect width
   const rectHeightR = useSharedValueR(100); // rect height
-  const rectXR = useSharedValueR(SCREEN_WIDTH * 0.25); // rect x position
-  const rectYR = useSharedValueR(SCREEN_HEIGHT * 0.25); // rect y position
+  const rectXR = useSharedValueR(0); // rect x position
+  const rectYR = useSharedValueR(0); // rect y position
 
   const updateRect = Worklets.createRunInJsFn((frame: any) => {
     rectWidthR.value = frame.width;
@@ -87,6 +87,7 @@ export default function App() {
   const frameProcessor = useFrameProcessor((frame: Frame) => {
     'worklet';
     const dataFace: FaceType = scanFaces(frame);
+    // console.log('dataFace => ', dataFace);
     if (dataFace) {
       if (dataFace.bounds) {
         const { width: frameWidth, height: frameHeight } = frame;

@@ -5,6 +5,9 @@ import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.RectF
+import android.media.Image
+import android.util.Log
+import androidx.camera.core.ImageProxy
 import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.common.internal.ImageConvertUtils
@@ -102,7 +105,7 @@ class VisionCameraFaceTflitePlugin(proxy: VisionCameraProxy, options: Map<String
   override fun callback(frame: Frame, params: Map<String, Any>?): Any? {
     try {
       val mediaImage = frame.image
-      val image = InputImage.fromMediaImage(mediaImage, Orientation.PORTRAIT.toDegrees())
+      val image = InputImage.fromMediaImage(mediaImage, Convert().getRotation(frame))
       val task = faceDetector.process(image)
       val faces = Tasks.await(task)
       if (faces.size > 0) {
@@ -122,7 +125,7 @@ class VisionCameraFaceTflitePlugin(proxy: VisionCameraProxy, options: Map<String
         matrix.postTranslate(-faceBB.left, -faceBB.top)
         matrix.postScale(sx, sy)
         cvFace.drawBitmap(bmpFrameResult, matrix, null)
-        val imageResult: String = Convert().getBase64Image(bmpFrameResult).toString()
+        val imageResult: String = Convert().getBase64Image(bmpFaceResult).toString()
 
         map["rollAngle"] =
           face.headEulerAngleZ.toDouble()
@@ -141,9 +144,22 @@ class VisionCameraFaceTflitePlugin(proxy: VisionCameraProxy, options: Map<String
         return map
       }
       return null
+
+      //      val bmpFrameResult: Bitmap = toBitmap(mediaImage)
+      //      val imageResult: String = Convert().getBase64Image(bmpFrameResult).toString()
+      //      val map: MutableMap<String, Any> = HashMap()
+      //      map["imageResult"] = imageResult
+      //      return map
     } catch (e: Exception) {
       e.printStackTrace()
       return null
     }
+  }
+
+  private fun toBitmap(image: Image): Bitmap {
+    val bitmapBuffer: Bitmap =
+      Bitmap.createBitmap(image.width, image.height, Bitmap.Config.ARGB_8888)
+    bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer)
+    return bitmapBuffer
   }
 }
