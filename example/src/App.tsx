@@ -23,6 +23,7 @@ import {
   // initTensor,
   tensorBase64,
   type FaceBoundType,
+  type FaceType,
 } from 'vision-camera-face-tflite';
 import { launchImageLibrary } from 'react-native-image-picker';
 // import { useResizePlugin } from 'vision-camera-resize-plugin';
@@ -77,46 +78,35 @@ export default function App() {
     rectXR.value = frame.x;
     rectYR.value = frame.y;
   });
-  const updateFace = Worklets.createRunInJsFn((image: string) => {
-    faceString.value = image;
-  });
+  // const updateFace = Worklets.createRunInJsFn((image: string) => {
+  //   faceString.value = image;
+  // });
 
   const frameProcessor = useFrameProcessor((frame: Frame) => {
     'worklet';
-    const dataFace = scanFaces(frame);
-    if (dataFace.length > 0) {
-      const firstFace = dataFace[0];
-      if (firstFace && firstFace.bounds) {
+    const dataFace: FaceType = scanFaces(frame);
+    if (dataFace) {
+      if (dataFace.bounds) {
         const { width: frameWidth, height: frameHeight } = frame;
         const xFactor = SCREEN_WIDTH / frameWidth;
         const yFactor = SCREEN_HEIGHT / frameHeight;
-        const bounds: FaceBoundType = firstFace.bounds;
+        const bounds: FaceBoundType = dataFace.bounds;
         rectWidth.value = bounds.width * xFactor;
         rectHeight.value = bounds.height * yFactor;
         rectX.value = bounds.boundingCenterX * xFactor;
         rectY.value = bounds.boundingCenterY * yFactor;
-
         updateRect({
           width: rectWidth.value,
           height: rectHeight.value,
           x: rectX.value,
           y: rectY.value,
         });
-        updateFace(firstFace.imageResult);
       }
+      // updateFace(dataFace.imageResult);
     }
-    // else {
-    //   updateRect({
-    //     width: 0,
-    //     height: 0,
-    //     x: 0,
-    //     y: 0,
-    //   });
-    // }
   }, []);
 
-  // Animated styles for the box
-  const animatedStyle = useAnimatedStyle(() => {
+  const faceAnimStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
       backgroundColor: 'red',
@@ -235,7 +225,7 @@ export default function App() {
           audio={false}
           frameProcessor={frameProcessor}
         />
-        <Animated.View style={animatedStyle} />
+        <Animated.View style={faceAnimStyle} />
         <View style={styles.wrapBottom}>
           <Button title={'Open Image'} onPress={_onOpenImage} />
           <Button

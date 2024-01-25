@@ -3,12 +3,12 @@ import { VisionCameraProxy, type Frame } from 'react-native-vision-camera';
 
 const plugin = VisionCameraProxy.initFrameProcessorPlugin('scanFace');
 
-export function scanFaces(frame: Frame): FaceType[] {
+export function scanFaces(frame: Frame): FaceType {
   'worklet';
   if (plugin == null) {
     throw new Error('Failed to load Frame Processor Plugin!');
   }
-  return plugin.call(frame) as unknown as FaceType[];
+  return plugin.call(frame) as unknown as FaceType;
 }
 
 const LINKING_ERROR =
