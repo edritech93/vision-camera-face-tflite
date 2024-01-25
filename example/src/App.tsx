@@ -45,7 +45,7 @@ const targetFps = 30;
 export default function App() {
   const [hasPermission, setHasPermission] = useState<boolean>(false);
   const [arrayTensor, setArrayTensor] = useState<number[]>([]);
-  const [faceString, setFaceString] = useState('');
+  const [faceString, _] = useState('');
 
   const camera = useRef<Camera>(null);
   const device = useCameraDevice('front', {
@@ -79,10 +79,10 @@ export default function App() {
     rectXR.value = frame.x;
     rectYR.value = frame.y;
   });
-  const updateFace = Worklets.createRunInJsFn((image: string) => {
-    setFaceString(image);
-    // faceString.value = image;
-  });
+  // const updateFace = Worklets.createRunInJsFn((image: string) => {
+  //   setFaceString(image);
+  //   // faceString.value = image;
+  // });
 
   const frameProcessor = useFrameProcessor((frame: Frame) => {
     'worklet';
@@ -105,8 +105,8 @@ export default function App() {
           y: rectY.value,
         });
       }
-      console.log('dataFace.imageResult => ', dataFace.imageResult.length);
-      updateFace(dataFace.imageResult);
+      // console.log('dataFace.imageResult => ', dataFace.imageResult.length);
+      // updateFace(dataFace.imageResult);
     }
   }, []);
 

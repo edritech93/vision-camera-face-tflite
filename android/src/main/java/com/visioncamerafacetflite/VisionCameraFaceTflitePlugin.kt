@@ -111,21 +111,21 @@ class VisionCameraFaceTflitePlugin(proxy: VisionCameraProxy, options: Map<String
       if (faces.size > 0) {
         val map: MutableMap<String, Any> = HashMap()
         val face = faces[0]
-        val bmpFrameResult = ImageConvertUtils.getInstance().getUpRightBitmap(image)
-        val bmpFaceResult = Bitmap.createBitmap(
-          Constant.TF_OD_API_INPUT_SIZE,
-          Constant.TF_OD_API_INPUT_SIZE,
-          Bitmap.Config.ARGB_8888
-        )
-        val faceBB = RectF(face.boundingBox)
-        val cvFace = Canvas(bmpFaceResult)
-        val sx = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.width()
-        val sy = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.height()
-        val matrix = Matrix()
-        matrix.postTranslate(-faceBB.left, -faceBB.top)
-        matrix.postScale(sx, sy)
-        cvFace.drawBitmap(bmpFrameResult, matrix, null)
-        val imageResult: String = Convert().getBase64Image(bmpFaceResult).toString()
+//        val bmpFrameResult = ImageConvertUtils.getInstance().getUpRightBitmap(image)
+//        val bmpFaceResult = Bitmap.createBitmap(
+//          Constant.TF_OD_API_INPUT_SIZE,
+//          Constant.TF_OD_API_INPUT_SIZE,
+//          Bitmap.Config.ARGB_8888
+//        )
+//        val faceBB = RectF(face.boundingBox)
+//        val cvFace = Canvas(bmpFaceResult)
+//        val sx = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.width()
+//        val sy = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.height()
+//        val matrix = Matrix()
+//        matrix.postTranslate(-faceBB.left, -faceBB.top)
+//        matrix.postScale(sx, sy)
+//        cvFace.drawBitmap(bmpFrameResult, matrix, null)
+//        val imageResult: String = Convert().getBase64Image(bmpFaceResult).toString()
 
         map["rollAngle"] =
           face.headEulerAngleZ.toDouble()
@@ -140,7 +140,7 @@ class VisionCameraFaceTflitePlugin(proxy: VisionCameraProxy, options: Map<String
         val bounds = processBoundingBox(face.boundingBox)
         map["bounds"] = bounds
 //        map["contours"] = contours
-        map["imageResult"] = imageResult
+//        map["imageResult"] = imageResult
         return map
       }
       return null
