@@ -45,6 +45,7 @@ const targetFps = 30;
 export default function App() {
   const [hasPermission, setHasPermission] = useState<boolean>(false);
   const [arrayTensor, setArrayTensor] = useState<number[]>([]);
+  const [faceString, setFaceString] = useState('');
 
   const camera = useRef<Camera>(null);
   const device = useCameraDevice('front', {
@@ -61,7 +62,7 @@ export default function App() {
   ]);
   const fps = Math.min(format?.maxFps ?? 1, targetFps);
   // const { resize } = useResizePlugin();
-  const faceString = useSharedValue<string>('');
+  // const faceString = useSharedValue<string>('');
   const rectWidth = useSharedValue(100); // rect width
   const rectHeight = useSharedValue(100); // rect height
   const rectX = useSharedValue(100); // rect x position
@@ -69,8 +70,8 @@ export default function App() {
 
   const rectWidthR = useSharedValueR(100); // rect width
   const rectHeightR = useSharedValueR(100); // rect height
-  const rectXR = useSharedValueR(100); // rect x position
-  const rectYR = useSharedValueR(100); // rect y position
+  const rectXR = useSharedValueR(SCREEN_WIDTH * 0.25); // rect x position
+  const rectYR = useSharedValueR(SCREEN_HEIGHT * 0.25); // rect y position
 
   const updateRect = Worklets.createRunInJsFn((frame: any) => {
     rectWidthR.value = frame.width;
@@ -78,9 +79,10 @@ export default function App() {
     rectXR.value = frame.x;
     rectYR.value = frame.y;
   });
-  // const updateFace = Worklets.createRunInJsFn((image: string) => {
-  //   faceString.value = image;
-  // });
+  const updateFace = Worklets.createRunInJsFn((image: string) => {
+    setFaceString(image);
+    // faceString.value = image;
+  });
 
   const frameProcessor = useFrameProcessor((frame: Frame) => {
     'worklet';
@@ -93,8 +95,8 @@ export default function App() {
         const bounds: FaceBoundType = dataFace.bounds;
         rectWidth.value = bounds.width * xFactor;
         rectHeight.value = bounds.height * yFactor;
-        rectX.value = bounds.boundingCenterX * xFactor;
-        rectY.value = bounds.boundingCenterY * yFactor;
+        rectX.value = bounds.x * xFactor;
+        rectY.value = bounds.y * yFactor;
         updateRect({
           width: rectWidth.value,
           height: rectHeight.value,
@@ -102,7 +104,8 @@ export default function App() {
           y: rectY.value,
         });
       }
-      // updateFace(dataFace.imageResult);
+      console.log('dataFace.imageResult => ', dataFace.imageResult.length);
+      updateFace(dataFace.imageResult);
     }
   }, []);
 
@@ -196,8 +199,6 @@ export default function App() {
     }
   };
 
-  console.log(faceString.value);
-
   if (device != null && format != null && hasPermission) {
     // console.log(
     //   `Device: "${device.name}" (${format.photoWidth}x${format.photoHeight} photo / ${format.videoWidth}x${format.videoHeight} video @ ${fps}fps)`
@@ -238,9 +239,9 @@ export default function App() {
           <Text style={styles.textResult}>{`Result: ${JSON.stringify(
             arrayTensor
           )}`}</Text>
-          {faceString?.value && (
+          {faceString.length > 0 && (
             <Animated.Image
-              source={{ uri: `data:image/png;base64,${faceString.value}` }}
+              source={{ uri: `data:image/png;base64,${faceString}` }}
               style={styles.imageFace}
             />
           )}
