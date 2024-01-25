@@ -53,10 +53,14 @@ export type FaceType = {
 };
 
 export type FaceBoundType = {
-  y: number;
-  x: number;
+  boundingCenterX: number;
+  boundingCenterY: number;
+  boundingExactCenterX: number;
+  boundingExactCenterY: number;
   height: number;
   width: number;
+  x: number;
+  y: number;
 };
 
 export type FaceContourType = {
