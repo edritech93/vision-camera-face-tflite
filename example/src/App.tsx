@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Button,
   Dimensions,
+  Image,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -16,6 +17,7 @@ import {
   CameraRuntimeError,
   useCameraFormat,
   useCameraDevice,
+  type PhotoFile,
 } from 'react-native-vision-camera';
 import {
   scanFaces,
@@ -45,7 +47,7 @@ const targetFps = 30;
 export default function App() {
   const [hasPermission, setHasPermission] = useState<boolean>(false);
   const [arrayTensor, setArrayTensor] = useState<number[]>([]);
-  const [faceString, _] = useState('');
+  const [dataCamera, setDataCamera] = useState<string | null>(null);
 
   const camera = useRef<Camera>(null);
   const device = useCameraDevice('front', {
@@ -105,8 +107,6 @@ export default function App() {
           y: rectY.value,
         });
       }
-      // console.log('dataFace.imageResult => ', dataFace.imageResult.length);
-      // updateFace(dataFace.imageResult);
     }
   }, []);
 
@@ -200,10 +200,28 @@ export default function App() {
     }
   };
 
-  if (device != null && format != null && hasPermission) {
-    // console.log(
-    //   `Device: "${device.name}" (${format.photoWidth}x${format.photoHeight} photo / ${format.videoWidth}x${format.videoHeight} video @ ${fps}fps)`
-    // );
+  const _onPressTake = async () => {
+    if (camera.current && !dataCamera) {
+      const data: PhotoFile = await camera.current.takePhoto({
+        flash: 'off',
+        qualityPrioritization: 'speed',
+      });
+      setDataCamera(`file:///${data.path}`);
+    }
+  };
+
+  if (dataCamera) {
+    return (
+      <View style={styles.container}>
+        <Image
+          style={styles.imgPreview}
+          source={{ uri: dataCamera }}
+          resizeMode={'contain'}
+        />
+        <Button title={'Remove'} onPress={() => setDataCamera(null)} />
+      </View>
+    );
+  } else if (device != null && format != null && hasPermission) {
     const pixelFormat = format.pixelFormats.includes('yuv') ? 'yuv' : 'native';
     return (
       <SafeAreaView style={styles.container}>
@@ -222,7 +240,7 @@ export default function App() {
           enableFpsGraph={false}
           orientation={'portrait'}
           pixelFormat={pixelFormat}
-          photo={false}
+          photo={true}
           video={false}
           audio={false}
           frameProcessor={frameProcessor}
@@ -230,6 +248,7 @@ export default function App() {
         <Animated.View style={faceAnimStyle} />
         <View style={styles.wrapBottom}>
           <Button title={'Open Image'} onPress={_onOpenImage} />
+          <Button title={'Take Photo'} onPress={_onPressTake} />
           <Button
             title={'Clear Data'}
             color={'red'}
@@ -240,12 +259,6 @@ export default function App() {
           <Text style={styles.textResult}>{`Result: ${JSON.stringify(
             arrayTensor
           )}`}</Text>
-          {faceString.length > 0 && (
-            <Animated.Image
-              source={{ uri: `data:image/png;base64,${faceString}` }}
-              style={styles.imageFace}
-            />
-          )}
         </ScrollView>
       </SafeAreaView>
     );
@@ -272,4 +285,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
   },
+  imgPreview: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+  },
 });
+
+// Uint8Array --> Base64
+// btoa(String.fromCharCode.apply(null,new Uint8Array([1,2,3,255])))
+
+// Base64 --> Uint8Array
+// new Uint8Array([...atob('AQID/w==')].map(c=>c.charCodeAt()))
