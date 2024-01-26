@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  Button,
   Dimensions,
   Image,
   Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import {
@@ -36,6 +34,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { Button, Text } from 'react-native-paper';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -128,6 +127,9 @@ export default function App() {
       const status = await Camera.requestCameraPermission();
       setHasPermission(status === 'granted');
     }
+    // initTensor('mobile_face_net', 1)
+    //   .then((response) => console.log(response))
+    //   .catch((error) => console.log(error));
     _getPermission();
   }, []);
 
@@ -137,9 +139,6 @@ export default function App() {
 
   const onInitialized = useCallback(() => {
     console.log('Camera initialized!');
-    // initTensor('mobile_face_net', 1)
-    //   .then((response) => console.log(response))
-    //   .catch((error) => console.log(error));
   }, []);
 
   // const frameProcessor = useFrameProcessor((frame: Frame) => {
@@ -218,7 +217,9 @@ export default function App() {
           source={{ uri: dataCamera }}
           resizeMode={'contain'}
         />
-        <Button title={'Remove'} onPress={() => setDataCamera(null)} />
+        <Button style={styles.btnClose} onPress={() => setDataCamera(null)}>
+          Remove
+        </Button>
       </View>
     );
   } else if (device != null && format != null && hasPermission) {
@@ -247,13 +248,9 @@ export default function App() {
         />
         <Animated.View style={faceAnimStyle} />
         <View style={styles.wrapBottom}>
-          <Button title={'Open Image'} onPress={_onOpenImage} />
-          <Button title={'Take Photo'} onPress={_onPressTake} />
-          <Button
-            title={'Clear Data'}
-            color={'red'}
-            onPress={() => setArrayTensor([])}
-          />
+          <Button onPress={_onOpenImage}>Open Image</Button>
+          <Button onPress={_onPressTake}>Take Photo</Button>
+          <Button onPress={() => setArrayTensor([])}>Clear Data</Button>
         </View>
         <ScrollView>
           <Text style={styles.textResult}>{`Result: ${JSON.stringify(
@@ -288,6 +285,9 @@ const styles = StyleSheet.create({
   imgPreview: {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
+  },
+  btnClose: {
+    position: 'absolute',
   },
 });
 

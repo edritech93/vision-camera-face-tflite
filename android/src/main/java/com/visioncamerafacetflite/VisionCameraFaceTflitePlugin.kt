@@ -111,22 +111,8 @@ class VisionCameraFaceTflitePlugin(proxy: VisionCameraProxy, options: Map<String
       if (faces.size > 0) {
         val map: MutableMap<String, Any> = HashMap()
         val face = faces[0]
-//        val bmpFrameResult = ImageConvertUtils.getInstance().getUpRightBitmap(image)
-//        val bmpFaceResult = Bitmap.createBitmap(
-//          Constant.TF_OD_API_INPUT_SIZE,
-//          Constant.TF_OD_API_INPUT_SIZE,
-//          Bitmap.Config.ARGB_8888
-//        )
-//        val faceBB = RectF(face.boundingBox)
-//        val cvFace = Canvas(bmpFaceResult)
-//        val sx = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.width()
-//        val sy = Constant.TF_OD_API_INPUT_SIZE.toFloat() / faceBB.height()
-//        val matrix = Matrix()
-//        matrix.postTranslate(-faceBB.left, -faceBB.top)
-//        matrix.postScale(sx, sy)
-//        cvFace.drawBitmap(bmpFrameResult, matrix, null)
-//        val imageResult: String = Convert().getBase64Image(bmpFaceResult).toString()
-
+//        val contours = processFaceContours(face);
+        val bounds = processBoundingBox(face.boundingBox)
         map["rollAngle"] =
           face.headEulerAngleZ.toDouble()
         map["pitchAngle"] =
@@ -135,21 +121,11 @@ class VisionCameraFaceTflitePlugin(proxy: VisionCameraProxy, options: Map<String
         map["leftEyeOpenProbability"] = face.leftEyeOpenProbability!!.toDouble()
         map["rightEyeOpenProbability"] = face.rightEyeOpenProbability!!.toDouble()
         map["smilingProbability"] = face.smilingProbability!!.toDouble()
-
-//        val contours = processFaceContours(face);
-        val bounds = processBoundingBox(face.boundingBox)
         map["bounds"] = bounds
 //        map["contours"] = contours
-//        map["imageResult"] = imageResult
         return map
       }
       return null
-
-      //      val bmpFrameResult: Bitmap = toBitmap(mediaImage)
-      //      val imageResult: String = Convert().getBase64Image(bmpFrameResult).toString()
-      //      val map: MutableMap<String, Any> = HashMap()
-      //      map["imageResult"] = imageResult
-      //      return map
     } catch (e: Exception) {
       e.printStackTrace()
       return null
