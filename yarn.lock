@@ -10891,6 +10891,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-fast-tflite@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "react-native-fast-tflite@npm:1.1.3"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: e352112391249cebdcb273555cd6f4e89b9f3ffffb5342977ab2948ae6d9db96bc035212cf88ba24085301e349fd5ac7a9c243a103fd0b021bfc9be97f46b9c0
+  languageName: node
+  linkType: hard
+
 "react-native-image-picker@npm:^7.1.0":
   version: 7.1.0
   resolution: "react-native-image-picker@npm:7.1.0"
@@ -13073,6 +13083,7 @@ __metadata:
     pod-install: ^0.1.0
     react: 18.2.0
     react-native: 0.73.2
+    react-native-fast-tflite: ^1.1.3
     react-native-image-picker: ^7.1.0
     react-native-paper: ^5.12.3
     react-native-permissions: ^4.0.4

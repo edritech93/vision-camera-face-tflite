@@ -33,6 +33,7 @@ import Animated, {
 import { Worklets, useSharedValue } from 'react-native-worklets-core';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useResizePlugin } from 'vision-camera-resize-plugin';
+import { useTensorflowModel } from 'react-native-fast-tflite';
 import { getPermissionReadStorage } from './permission';
 import { Button, Text } from 'react-native-paper';
 
@@ -68,11 +69,17 @@ export default function App() {
   const rectHeight = useSharedValue(100); // rect height
   const rectX = useSharedValue(100); // rect x position
   const rectY = useSharedValue(100); // rect y position
-
   const rectWidthR = useSharedValueR(100); // rect width
   const rectHeightR = useSharedValueR(100); // rect height
   const rectXR = useSharedValueR(0); // rect x position
   const rectYR = useSharedValueR(0); // rect y position
+  // const {model} =
+  // require('./assets/object_detector.tflite')
+  const objectDetection = useTensorflowModel(
+    require('./assets/object_detector.tflite')
+  );
+  const model =
+    objectDetection.state === 'loaded' ? objectDetection.model : undefined;
 
   const updateRect = Worklets.createRunInJsFn((frame: any) => {
     rectWidthR.value = frame.width;
@@ -84,46 +91,50 @@ export default function App() {
   //   faceString.value = image;
   // });
 
-  const frameProcessor = useFrameProcessor((frame: Frame) => {
-    'worklet';
-    const start = performance.now();
-    const dataFace: FaceType = scanFaces(frame);
-    // console.log('dataFace => ', dataFace);
-    // NOTE: handle face detection
-    if (dataFace) {
-      if (dataFace.bounds) {
-        const { width: frameWidth, height: frameHeight } = frame;
-        const xFactor = SCREEN_WIDTH / frameWidth;
-        const yFactor = SCREEN_HEIGHT / frameHeight;
-        const bounds: FaceBoundType = dataFace.bounds;
-        rectWidth.value = bounds.width * xFactor;
-        rectHeight.value = bounds.height * yFactor;
-        rectX.value = bounds.x * xFactor;
-        rectY.value = bounds.y * yFactor;
-        updateRect({
-          width: rectWidth.value,
-          height: rectHeight.value,
-          x: rectX.value,
-          y: rectY.value,
-        });
-        // NOTE: handle resize frame
-        const data = resize(frame, {
-          size: {
+  const frameProcessor = useFrameProcessor(
+    (frame: Frame) => {
+      'worklet';
+      const start = performance.now();
+      const dataFace: FaceType = scanFaces(frame);
+      // console.log('dataFace => ', dataFace);
+      // NOTE: handle face detection
+      if (dataFace) {
+        if (dataFace.bounds && model) {
+          const { width: frameWidth, height: frameHeight } = frame;
+          const xFactor = SCREEN_WIDTH / frameWidth;
+          const yFactor = SCREEN_HEIGHT / frameHeight;
+          const bounds: FaceBoundType = dataFace.bounds;
+          rectWidth.value = bounds.width * xFactor;
+          rectHeight.value = bounds.height * yFactor;
+          rectX.value = bounds.x * xFactor;
+          rectY.value = bounds.y * yFactor;
+          updateRect({
+            width: rectWidth.value,
+            height: rectHeight.value,
             x: rectX.value,
             y: rectY.value,
-            width: 112,
-            height: 112,
-          },
-          pixelFormat: 'rgb',
-          dataType: 'uint8',
-        });
-        const array: Uint8Array = new Uint8Array(data);
-        console.log('array => ', array.length);
-        const end = performance.now();
-        console.log(`Performance: ${end - start}ms`);
+          });
+          // NOTE: handle resize frame
+          const data = resize(frame, {
+            size: {
+              x: rectX.value,
+              y: rectY.value,
+              width: 112,
+              height: 112,
+            },
+            pixelFormat: 'rgb',
+            dataType: 'uint8',
+          });
+          const array: Uint8Array = new Uint8Array(data);
+          const output = model.runSync([array] as any[]);
+          console.log('Result: ', output.length);
+          const end = performance.now();
+          console.log(`Performance: ${end - start}ms`);
+        }
       }
-    }
-  }, []);
+    },
+    [model]
+  );
 
   const faceAnimStyle = useAnimatedStyle(() => {
     return {
