@@ -25,15 +25,15 @@ import {
   type FaceBoundType,
   type FaceType,
 } from 'vision-camera-face-tflite';
-import { launchImageLibrary } from 'react-native-image-picker';
-// import { useResizePlugin } from 'vision-camera-resize-plugin';
-import { getPermissionReadStorage } from './permission';
-import { Worklets, useSharedValue } from 'react-native-worklets-core';
 import Animated, {
   useSharedValue as useSharedValueR,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { Worklets, useSharedValue } from 'react-native-worklets-core';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { useResizePlugin } from 'vision-camera-resize-plugin';
+import { getPermissionReadStorage } from './permission';
 import { Button, Text } from 'react-native-paper';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -62,7 +62,7 @@ export default function App() {
     { photoResolution: 'max' },
   ]);
   const fps = Math.min(format?.maxFps ?? 1, targetFps);
-  // const { resize } = useResizePlugin();
+  const { resize } = useResizePlugin();
   // const faceString = useSharedValue<string>('');
   const rectWidth = useSharedValue(100); // rect width
   const rectHeight = useSharedValue(100); // rect height
@@ -80,15 +80,16 @@ export default function App() {
     rectXR.value = frame.x;
     rectYR.value = frame.y;
   });
-  // const updateFace = Worklets.createRunInJsFn((image: string) => {
-  //   setFaceString(image);
-  //   // faceString.value = image;
+  // const updateFace = Worklets.createRunInJsFn((array: Uint8Array) => {
+  //   faceString.value = image;
   // });
 
   const frameProcessor = useFrameProcessor((frame: Frame) => {
     'worklet';
+    const start = performance.now();
     const dataFace: FaceType = scanFaces(frame);
     // console.log('dataFace => ', dataFace);
+    // NOTE: handle face detection
     if (dataFace) {
       if (dataFace.bounds) {
         const { width: frameWidth, height: frameHeight } = frame;
@@ -105,6 +106,21 @@ export default function App() {
           x: rectX.value,
           y: rectY.value,
         });
+        // NOTE: handle resize frame
+        const data = resize(frame, {
+          size: {
+            x: rectX.value,
+            y: rectY.value,
+            width: 112,
+            height: 112,
+          },
+          pixelFormat: 'rgb',
+          dataType: 'uint8',
+        });
+        const array: Uint8Array = new Uint8Array(data);
+        console.log('array => ', array.length);
+        const end = performance.now();
+        console.log(`Performance: ${end - start}ms`);
       }
     }
   }, []);
@@ -140,35 +156,6 @@ export default function App() {
   const onInitialized = useCallback(() => {
     console.log('Camera initialized!');
   }, []);
-
-  // const frameProcessor = useFrameProcessor((frame: Frame) => {
-  //   'worklet';
-  //   const start = performance.now();
-  //   const dataFace = scanFaces(frame);
-  //   // console.log('dataFace => ', dataFace);
-  //   if (dataFace.length > 0) {
-  //     const firstFace = dataFace[0];
-  //     if (firstFace && firstFace.bounds) {
-  //       const { x, y, height, width } = firstFace.bounds;
-  //       point.value = {
-  //         // x: 0,
-  //         // y: 0,
-  //         height: height,
-  //         width: width,
-  //       };
-  //     }
-  //   }
-  //   const data = resize(frame, {
-  //     size: {
-  //       width: 192,
-  //       height: 192,
-  //     },
-  //     pixelFormat: 'rgb-uint8',
-  //   });
-  //   const array = new Uint8Array(data);
-  //   const end = performance.now();
-  //   console.log(`Performance: ${end - start}ms`);
-  // }, []);
 
   const _onOpenImage = async () => {
     await getPermissionReadStorage().catch((error: Error) => {
@@ -267,11 +254,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  imageFace: {
-    height: 150,
-    width: 150,
-    margin: 16,
   },
   textResult: {
     color: 'black',
