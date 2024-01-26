@@ -12979,7 +12979,7 @@ __metadata:
     react-native-reanimated: ^3.6.1
     react-native-vision-camera: ^3.8.2
     react-native-worklets-core: ^0.2.4
-    vision-camera-resize-plugin: ^1.0.2
+    vision-camera-resize-plugin: ^1.2.2
   languageName: unknown
   linkType: soft
 
@@ -13018,15 +13018,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"vision-camera-resize-plugin@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "vision-camera-resize-plugin@npm:1.0.2"
+"vision-camera-resize-plugin@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "vision-camera-resize-plugin@npm:1.2.2"
   peerDependencies:
     react: "*"
     react-native: "*"
     react-native-vision-camera: ">=3.8.0"
     react-native-worklets-core: ">=0.2.4"
-  checksum: 76bd6fe44f520b1102b60ea64961059182af8837b08213410886f0db2b116298749c020812cbc80b0186f9eff0d2d2ce377fcae5ea8fd7cd2d10bafbf8e3421e
+  checksum: 5ad63e27a6c66e36c206eb8e3c24d8ed0234ed4c8a4e9b66d2a98ca8a410989c7f641b2fc36216e62458204616b1f11e27917940a5cc0054cb44d0570f1c5bbc
   languageName: node
   linkType: hard
 
