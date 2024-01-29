@@ -105,36 +105,28 @@ public class VisionCameraFaceTflitePlugin: FrameProcessorPlugin {
     @objc override public func callback(_ frame: Frame, withArguments arguments: [AnyHashable : Any]?) -> Any? {
         let image = VisionImage(buffer: frame.buffer)
         image.orientation = .up
-        
-        var faceAttributes: [Any] = []
-        
         do {
             let faces: [Face] =  try VisionCameraFaceTflitePlugin.faceDetector.results(in: image)
             if (!faces.isEmpty){
-                for face in faces {
-                    let imageCrop = getImageFaceFromBuffer(from: frame.buffer, rectImage: face.frame)
-                    var imageResult: String? = nil
-                    if (imageCrop != nil)  {
-                        imageResult = convertImageToBase64(image: imageCrop!)
-                    }
-                    var map: [String: Any] = [:]
-                    map["rollAngle"] = face.headEulerAngleZ  // Head is tilted sideways rotZ degrees
-                    map["pitchAngle"] = face.headEulerAngleX  // Head is rotated to the uptoward rotX degrees
-                    map["yawAngle"] = face.headEulerAngleY   // Head is rotated to the right rotY degrees
-                    map["leftEyeOpenProbability"] = face.leftEyeOpenProbability
-                    map["rightEyeOpenProbability"] = face.rightEyeOpenProbability
-                    map["smilingProbability"] = face.smilingProbability
-                    map["bounds"] = VisionCameraFaceTflitePlugin.processBoundingBox(from: face)
-                    map["contours"] = VisionCameraFaceTflitePlugin.processContours(from: face)
-                    map["imageResult"] = imageResult
-                    
-                    faceAttributes.append(map)
+                guard let face = faces.first else {
+                    return nil
                 }
+                var map: [String: Any] = [:]
+                map["rollAngle"] = face.headEulerAngleZ  // Head is tilted sideways rotZ degrees
+                map["pitchAngle"] = face.headEulerAngleX  // Head is rotated to the uptoward rotX degrees
+                map["yawAngle"] = face.headEulerAngleY   // Head is rotated to the right rotY degrees
+                map["leftEyeOpenProbability"] = face.leftEyeOpenProbability
+                map["rightEyeOpenProbability"] = face.rightEyeOpenProbability
+                map["smilingProbability"] = face.smilingProbability
+                map["bounds"] = VisionCameraFaceTflitePlugin.processBoundingBox(from: face)
+                map["contours"] = VisionCameraFaceTflitePlugin.processContours(from: face)
+                return map
+            } else {
+                return nil
             }
         } catch {
             print("error: \(error)")
             return nil
         }
-        return faceAttributes
     }
 }

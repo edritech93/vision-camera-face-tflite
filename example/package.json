@@ -5,18 +5,22 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "start": "react-native start",
+    "start": "react-native start --reset-cache",
     "build:android": "cd android && ./gradlew assembleDebug --no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a",
     "build:ios": "cd ios && xcodebuild -workspace VisionCameraFaceTfliteExample.xcworkspace -scheme VisionCameraFaceTfliteExample -configuration Debug -sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO"
   },
   "dependencies": {
     "react": "18.2.0",
     "react-native": "0.73.2",
+    "react-native-fast-tflite": "^1.1.3",
     "react-native-image-picker": "^7.1.0",
+    "react-native-paper": "^5.12.3",
     "react-native-permissions": "^4.0.4",
     "react-native-reanimated": "^3.6.1",
+    "react-native-safe-area-context": "^4.8.2",
     "react-native-vision-camera": "^3.8.2",
-    "react-native-worklets-core": "^0.2.4"
+    "react-native-worklets-core": "^0.2.4",
+    "vision-camera-resize-plugin": "^1.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
