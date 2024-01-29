@@ -209,7 +209,7 @@ export default function App() {
 
   if (dataCamera) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <Image
           style={styles.imgPreview}
           source={{ uri: dataCamera }}
@@ -218,7 +218,7 @@ export default function App() {
         <Button style={styles.btnClose} onPress={() => setDataCamera(null)}>
           Remove
         </Button>
-      </View>
+      </SafeAreaView>
     );
   } else if (device != null && format != null && hasPermission) {
     const pixelFormat = format.pixelFormats.includes('yuv') ? 'yuv' : 'native';
@@ -278,10 +278,9 @@ const styles = StyleSheet.create({
   imgPreview: {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-  },
-  btnClose: {
     position: 'absolute',
   },
+  btnClose: {},
 });
 
 // Uint8Array --> Base64
