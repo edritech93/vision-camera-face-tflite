@@ -73,13 +73,10 @@ export default function App() {
   const rectHeightR = useSharedValueR(100); // rect height
   const rectXR = useSharedValueR(0); // rect x position
   const rectYR = useSharedValueR(0); // rect y position
-  // const {model} =
-  // require('./assets/object_detector.tflite')
-  const objectDetection = useTensorflowModel(
-    require('./assets/object_detector.tflite')
+  const fileTflite = useTensorflowModel(
+    require('./assets/mobile_face_net.tflite')
   );
-  const model =
-    objectDetection.state === 'loaded' ? objectDetection.model : undefined;
+  const model = fileTflite.state === 'loaded' ? fileTflite.model : undefined;
 
   const updateRect = Worklets.createRunInJsFn((frame: any) => {
     rectWidthR.value = frame.width;
@@ -123,11 +120,11 @@ export default function App() {
               height: 112,
             },
             pixelFormat: 'rgb',
-            dataType: 'uint8',
+            dataType: 'float32',
           });
-          const array: Uint8Array = new Uint8Array(data);
+          const array: Float32Array = new Float32Array(data);
           const output = model.runSync([array] as any[]);
-          console.log('Result: ', output.length);
+          console.log('Result: ', output.toString());
           const end = performance.now();
           console.log(`Performance: ${end - start}ms`);
         }
